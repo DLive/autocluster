@@ -1,0 +1,19 @@
+{application, autocluster,
+    [{description, "An OTP application"},
+        {vsn, "0.1.0"},
+        {registered, []},
+        {mod, {autocluster_app, []}},
+        {applications,
+            [kernel,
+                stdlib,
+                erlzk,
+                lager,
+                edoc
+            ]},
+        {env, []},
+        {modules, []},
+
+        {maintainers, []},
+        {licenses, ["Apache 2.0"]},
+        {links, []}
+    ]}.
