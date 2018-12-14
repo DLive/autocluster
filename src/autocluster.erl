@@ -41,15 +41,15 @@ get_cluster_list()->
 
 join_cluster()->
     PingList=get_cluster_list() -- [node()],
-    lager:debug("find cluster list ~p",[PingList]),
+    logger:debug("find cluster list ~p",[PingList]),
     case ping_list(PingList)  of
         pong ->
             pong;
         pang when PingList =/= []->
-            lager:warning("can not connection to cluster nodes:~p",[PingList]),
+            logger:warning("can not connection to cluster nodes:~p",[PingList]),
             pang;
         pang ->
-            lager:warning("node is not config cluster list",[]),
+            logger:warning("node is not config cluster list",[]),
             pang
     end.
 

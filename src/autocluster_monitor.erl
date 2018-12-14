@@ -66,12 +66,12 @@ handle_call({typenode_list, Type}, _From, State) ->
 
 %% @doc 获取集群当前节点的类型
 handle_call({sync_node_info}, _From, State) ->
-    lager:info("reciver one sync_node_info from:~p", [_From]),
+    logger:info("reciver one sync_node_info from:~p", [_From]),
     Self_typelist = get_self_typelist(State),
     {reply, {ok, Self_typelist}, State};
 
 handle_call({sync_nodeid, Nodeid}, _From, State) ->
-    lager:info("reciver one sync_nodeid from:~p", [_From]),
+    logger:info("reciver one sync_nodeid from:~p", [_From]),
     {reply, {ok}, State};
 
 
@@ -80,7 +80,7 @@ handle_call(_Request, _From, State) ->
 
 %%收到一个通知，一个新的节点类型已启动
 handle_cast({notificaion_node_type, Node_TypeList}, State) ->
-    lager:info("notificaion_node_type:~p", [Node_TypeList]),
+    logger:info("notificaion_node_type:~p", [Node_TypeList]),
     insert_node_typelists(Node_TypeList),
     {noreply, State};
 
@@ -102,7 +102,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({nodeup, Node}, State) ->
-    lager:info("[nodeup] get event nodeup node name:~p", [Node]),
+    logger:info("[nodeup] get event nodeup node name:~p", [Node]),
     {noreply, State};
 
 handle_info({timeout, _TimerRef, {check_cluster_node}}, State) ->
@@ -117,7 +117,7 @@ handle_info({timeout, _TimerRef, {re_sync_nodeinfo, NodeList}}, State) ->
 handle_info({nodedown, Node}, State) ->
     delete_node_typelists(Node),
     check_cluster_node(State), %%进行节点检查。
-    lager:info("node ~w was down", [Node]),
+    logger:info("node ~w was down", [Node]),
     notice_down(Node),
     {noreply, State};
 
@@ -138,21 +138,21 @@ sync_other_nodeinfo() ->
 sync_other_nodeinfo(NodeList) ->
     Type_nodelist = lists:foldl(
         fun(X, TypeList) ->
-            lager:info("sync_node_info will  sync from ~p", [X]),
+            logger:info("sync_node_info will  sync from ~p", [X]),
             try gen_server:call({push_node_monitor, X}, {sync_node_info}, 3000) of
                 {ok, NodeInfo} ->
-                    lager:info("sync_node_info success from ~p, ~w", [X, NodeInfo]),
+                    logger:info("sync_node_info success from ~p, ~w", [X, NodeInfo]),
                     TypeList ++ NodeInfo
             catch
                 ET:ER ->
-                    lager:info("sync_node_info fail from ~p, et:~p er:~p", [X, ET, ER]),
+                    logger:info("sync_node_info fail from ~p, et:~p er:~p", [X, ET, ER]),
                     Timout = case random:uniform(60) of
                                  0 ->
                                      20000;
                                  Other ->
                                      Other * 1000
                              end,
-                    lager:info("re_sync_nodeinfo  timeout:~p", [Timout]),
+                    logger:info("re_sync_nodeinfo  timeout:~p", [Timout]),
                     erlang:start_timer(Timout, self(), {re_sync_nodeinfo, [X]}),
                     TypeList
             end

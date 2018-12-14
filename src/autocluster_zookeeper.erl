@@ -170,10 +170,10 @@ connection()->
 create_path(Pid,Path,CreateType)->
     case erlzk:create(Pid,Path,CreateType) of
         {ok,ActualPath}->
-            lager:debug("create zk path  success ~p",[ActualPath]),
+            logger:debug("create zk path  success ~p",[ActualPath]),
             ok;
         {error,R1}->
-            lager:debug("create zk path error ~p ~p",[Path,R1])
+            logger:debug("create zk path error ~p ~p",[Path,R1])
     end,
     ok.
 
@@ -187,11 +187,11 @@ check_and_create_path(ZkPid,RootPath,[{Item,CreateType}|Rst])->
         {ok,_Stat} ->
             check_and_create_path(ZkPid,CheckPath,Rst);
         {error,no_node}->
-            lager:info("check_and_create_path unexist no_node ~p",[CheckPath]),
+            logger:info("check_and_create_path unexist no_node ~p",[CheckPath]),
             create_path(ZkPid,CheckPath,CreateType),
             check_and_create_path(ZkPid,CheckPath,Rst);
         {error,R1} ->
-            lager:info("check_and_create_path unexist ~p ~p",[R1,CheckPath]),
+            logger:info("check_and_create_path unexist ~p ~p",[R1,CheckPath]),
             check_and_create_path(ZkPid,CheckPath,Rst)
     end.
 
@@ -239,7 +239,7 @@ register_node(Prefix,Env,NodeType)->
             ok
     catch
         T:R->
-            lager:debug("autocluster register node fail ~p ~p",[T,R]),
+            logger:debug("autocluster register node fail ~p ~p",[T,R]),
             fail
     end.
 query_registed_list(Prefix,Env)->
@@ -248,7 +248,7 @@ query_registed_list(Prefix,Env)->
             List
     catch
         T:R->
-            lager:debug("autocluster query registed list fail ~p ~p",[T,R]),
+            logger:debug("autocluster query registed list fail ~p ~p",[T,R]),
             []
     end.
 
@@ -263,7 +263,7 @@ write_node_info(Pid,Prefix,Env,NodeType)->
 get_node_list(Pid,Path)->
     case erlzk:get_children(Pid,Path,spawn(autocluster_zookeeper,node_watcher,[Path])) of
         {ok,ChildList} ->
-            lager:debug("get provider list ~p",[ChildList]),
+            logger:debug("get provider list ~p",[ChildList]),
             NodeList2 =
                 lists:map(fun(Item)->
                     {ok,Nodeinfo}=decode_node_info(Item),
@@ -271,7 +271,7 @@ get_node_list(Pid,Path)->
                           end,ChildList),
             {ok,NodeList2};
         {error,R1} ->
-            lager:debug("get_provider_list error ~p ~p",[R1,Path]),
+            logger:debug("get_provider_list error ~p ~p",[R1,Path]),
             {ok,[]}
     end.
 
@@ -279,11 +279,11 @@ node_watcher(Interface)->
     receive
         {node_children_changed,Path} ->
             gen_server:cast(?SERVER,{provider_node_change,Interface,Path}),
-            lager:debug("provider_watcher get event ~p ~p",[node_children_changed,Path]);
+            logger:debug("provider_watcher get event ~p ~p",[node_children_changed,Path]);
         {Event, Path} ->
 %%            Path = "/a",
 %%            Event = node_created
-            lager:debug("provider_watcher get event ~p ~p",[Event,Path])
+            logger:debug("provider_watcher get event ~p ~p",[Event,Path])
     end,
     ok.
 
