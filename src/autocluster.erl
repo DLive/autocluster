@@ -46,7 +46,7 @@ join_cluster()->
         pong ->
             pong;
         pang when PingList =/= []->
-            logger:warning("can not connection to cluster nodes:~p",[PingList]),
+            logger:warning("can not join to cluster nodes:~p",[PingList]),
             pang;
         pang ->
             logger:warning("node is not config cluster list",[]),
