@@ -31,8 +31,14 @@ start_link() ->
 %% Before OTP 18 tuples must be used to specify a child. e.g.
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    Zk = {autocluster_zookeeper,{autocluster_zookeeper,start_link,[]},permanent,2000,worker,[autocluster_zookeeper]},
-    {ok, { {one_for_all, 0, 1}, [Zk]} }.
+    Child =
+        case application:get_env(autocluster,discover_type,manual) of
+            zookeeper->
+                [{autocluster_zookeeper,{autocluster_zookeeper,start_link,[]},permanent,2000,worker,[autocluster_zookeeper]}];
+            manual->
+                []
+        end,
+    {ok, { {one_for_all, 0, 1}, Child} }.
 
 %%====================================================================
 %% Internal functions
